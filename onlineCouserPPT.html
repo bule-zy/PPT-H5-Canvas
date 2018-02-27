@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>课件显示</title>
+		<link rel="stylesheet" type="text/css" href="ppt/css/base.css"/>
+		<link rel="stylesheet" type="text/css" href="ppt/css/style.css"/>
+		<link rel="stylesheet" type="text/css" href="ppt/css/index.css"/>
+		<script src="ppt/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="ppt/js/index.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+	<div id="divPageInfo" style="position:fixed;left:5px;bottom:0;z-index:99999;width:60px;height:20px;color:gray;font-size:12px;"></div>
+		<div class="content">
+			<div class="ppt-img" id="pptImg">
+				<img id="imgBox" ondragstart="return false;" onselectstart="return false;" oncontextmenu="return false;" class="navInNext" style="display: block;	position: relative;	width: 100%;max-width:100%;" />
+			</div>
+			<ul id="canvasList" >
+				
+					<li>
+						<div class="pos">
+							<canvas ondragstart="return false;" oncontextmenu="return false;" onselectstart="return false;" id="canvas1">您的浏览器不支持 canvas 标签</canvas>
+						</div>
+					</li>
+				
+				<li id="whiteboard">
+					<div class="whiteboard" >
+				   		<canvas ondragstart="return false;" oncontextmenu="return false;" id="canvas0" onselectstart="return false;">您的浏览器不支持 canvas 标签</canvas>
+				   	</div>
+				</li>
+			</ul>
+			
+			<div class="play_oper">
+		   		<ul class="play_ul">
+		   			<li id="up" class="gray" title="上一页">
+		   				<span class="icon-up"></span>
+		   			</li>
+		   			<li id="down" title="下一页">
+		   				<span class="icon-down"></span>
+		   			</li>
+		   			<li id="brush" title="画笔">
+		   				<span class="icon-pencil"></span>
+		   				<dl class="flow_list">
+	   						<dd class="brush_w">
+	   							<div id="color">
+									<p>请选择画笔颜色：</p>
+									<input class="i2 active" type="button" value="" />
+									<input class="i1" type="button" value="" />
+									<input class="i3" type="button" value="" />
+									<input class="i4" type="button" value="" />
+									<input class="i5" type="button" value="" />
+									<input class="i6" type="button" value="" />
+									<input class="i7" type="button" value="" />
+									<input class="i8" type="button" value="" />
+									<input class="i9" type="button" value="" />
+								</div>
+								<div class="font" id="font">
+									<p>请选择画笔的宽度：</p>
+									<input type="button" value="细"  class="grea"/>
+									<input type="button" value="中" />
+									<input type="button" value="粗" />
+								</div>
+								<input id="revocation" type="button" style="display: none;" value="撤销" style="width:80px;" />
+								<input id="imgurl" type="button"  style="display: none;" value="导出图片路径" style="width:80px;" />
+	   						</dd>
+	   					</dl>
+		   			</li>
+		   			<li title="橡皮擦">
+		   				<div id="eraser">
+		   					<span class="icon-eraser"></span>
+		   				</div>
+		   				<span id="error" style="display: none;">如果有错误，请使用橡皮擦：</span>
+		   			</li>
+		   			<li title="清空画板">
+		   				<div id="clear">
+		   					<span class="icon-clear"></span>
+		   				</div>
+		   			</li>
+		   			<li id="fontBox" style="display:none;" title="文本框">
+		   				<span class="icon-text" id="fontIc"></span>
+		   				<dl class="flow_list">
+	   						<dd class="brush_w">
+	   							<div id="fontColor">
+									<p>请选择文字颜色：</p>
+									<input class="i2" type="button" value="" />
+									<input class="i1" type="button" value="" />
+									<input class="i3" type="button" value="" />
+									<input class="i4" type="button" value="" />
+									<input class="i5" type="button" value="" />
+									<input class="i6" type="button" value="" />
+									<input class="i7" type="button" value="" />
+									<input class="i8" type="button" value="" />
+									<input class="i9" type="button" value="" />
+								</div>
+								<div class="font" id="fontSize">
+									<p>请选择文字的大小：</p>
+									<input type="button" value="12" />
+									<input type="button" value="14" />
+									<input type="button" value="16" />
+									<input type="button" value="18" />
+									<input type="button" value="20" />
+									<input type="button" value="22" />
+									<input type="button" value="24" />
+									<input type="button" value="36" />
+									<input type="button" value="48" />
+									<input type="button" value="72" />
+								</div>
+							</dd>
+	   					</dl>
+		   			</li>
+		   			<li id="whiteboard-btn" title="白板">
+		   				<span class="icon-whiteboard"></span>
+		   			</li>
+		   		</ul>
+		   	</div>
+		    <ul id="textBox"></ul>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var winHeight;
+		var screenH = window.screen.height;
+		var screenW = window.screen.width;
+		// 获取窗口高度
+		if (window.innerHeight){
+			winHeight = -window.innerHeight;
+		}else if ((document.body) && (document.body.clientHeight)){
+			winHeight = -document.body.clientHeight;
+		}
+		
+		var hashMap = {  
+			    Set : function(key,value){this[key] = value},  
+			    Get : function(key){return this[key]},  
+			    Contains : function(key){return this.Get(key) == null?false:true},  
+			    Remove : function(key){delete this[key]}  
+			};
+		
+		$(document).ready(function(){
+		    $(document).bind("contextmenu",function(e){
+		        return false;
+		    });
+		    preloadImg(arrImg);
+		    changeColor();
+			changeFont();
+		});
+		$(document).keydown(function(event){ 
+			if(event.keyCode == 37 || event.keyCode == 38 ){ 
+				pageUp();
+			}else if (event.keyCode == 39 || event.keyCode == 40){ 
+				pageDown();
+			} 
+		}); 
+		var iptNum = $("#color").find("input"),
+			fontIptNum = $("#font").find("input"),
+			isEraser = false,
+			lock = false,
+			t = this,
+			color = ["#FF0000", "#000000", "#80FF00", "#00FFFF", "#808080", "#FF8000", "#408080", "#8000FF", "#CCCC00"],
+			fontWeight = [2, 5, 8],
+			arrAn = ["fxSoftScale","fxSideSwing","fxFortuneWheel","fxPushReveal","fxSnapIn","fxLetMeIn","fxStickIt","fxArchiveMe","fxVGrowth","fxSoftPulse","fxEarthquake","fxCliffDiving"],
+			eraserRadius = 15,
+			g_canvas = null,
+			text = null,
+			canvasList = $("#canvasList"),
+			canvasListLi = canvasList.find("li"),
+			canvasListT = canvasList.find("canvas"),
+			num = 0,
+			n = null,
+			arrImg = ["ppt/images/1.jpg","ppt/images/2.jpg","ppt/images/3.jpg","ppt/images/4.jpg","ppt/images/5.jpg","ppt/images/6.jpg"];
+			
+			//初始化arrImg
+			$("input[name='pptUrl']").each(function(i){
+		    	arrImg.push($(this).val());
+		    });
+			
+			var imgWrap = [];
+
+		    function preloadImg(arr) {
+		        for(var i =0; i< arr.length ;i++) {
+		            imgWrap[i] = new Image();
+		            imgWrap[i].src = arr[i];
+		        }
+		    }
+			var timeP = 0;
+			$("#imgBox").load(function(){
+				if(timeP > 0){
+					clearTimeout(timeP);
+				}
+				timeP = setTimeout(function(){
+		    		$("body").css('background-image',"url("+ $("#imgBox").attr("src") +")");
+		    	},1000)
+				
+			})
+//			初始化图片,画布
+			function init(flag){
+				var movieClass = $("#pptImg").attr("movieClass");
+				$("#pptImg").removeClass(movieClass);
+				n = Math.floor(Math.random() * arrAn.length + 1)-1;
+				$("#pptImg").addClass( arrAn[n] );
+				$("#pptImg").attr("movieClass",arrAn[n]);
+				$("#divPageInfo").html("" + (num + 1) + "/" + arrImg.length);
+				$("#imgBox").attr('src',arrImg[num]);
+			}
+			init(false);
+			canvasListLi.hide();
+			canvasListLi.eq(0).show().addClass('block');
+			g_canvas = document.getElementById("canvas1");
+			text = g_canvas.getContext('2d');
+			//g_context = g_canvas.getContext('2d');
+			resizeCanvas(num);
+			
+			text.strokeStyle = changeColor(); 
+			text.lineWidth = changeFont();
+			
+			bindCanvasEvent(document.getElementById("canvas1"));
+			bindCanvasEvent(document.getElementById("canvas0"));
+			
+			$(".icon-pencil").click(function(){
+				$(".active").click();
+				$(this).css("color",color[$("#color input").index($(".active"))]);
+				$(".icon-eraser").css("color","#333");
+			})
+			$(window).resize(function() {
+				// 获取窗口高度
+				if (window.innerHeight){
+					winHeight = -window.innerHeight;
+				}else if ((document.body) && (document.body.clientHeight)){
+					winHeight = -document.body.clientHeight;
+				}
+			});
+//			切换图片
+			$("#up").click(function(){
+				pageUp();
+			})
+			$("#down").click(function(){
+				pageDown();
+			})
+			
+			function pageUp(){
+				g_canvas = document.getElementById("canvas1");
+				text = g_canvas.getContext('2d');
+				saveCanvas(num);
+				$('.gray').removeClass('gray');
+				num--;
+				if(num < 1){
+					$("#up").addClass("gray");
+					if(num < 0){
+						num = 0;
+						return false;
+					}
+				}
+				//如果白板是显示的  则先隐藏它
+				if($("#whiteboard").hasClass('show')){
+					saveCanvasWhite();
+					$(".whiteboard").animate({top:winHeight},1000,function() {
+						$("#whiteboard").removeClass('show');
+				    });
+				}
+				text.clearRect(0, 0, g_canvas.width, g_canvas.height);
+				resizeCanvas(num);
+				//move(g_canvas,text);
+				init(true);
+			}
+			
+			function pageDown(){
+				g_canvas = document.getElementById("canvas1");
+				text = g_canvas.getContext('2d');
+				saveCanvas(num);
+				$('.gray').removeClass('gray');
+				num++;
+				if(num > arrImg.length - 2){
+					$("#down").addClass("gray");
+					if(num > arrImg.length - 1){
+						num = arrImg.length -1;
+						return false;
+					}
+				}
+				//如果白板是显示的  则先隐藏它
+				if($("#whiteboard").hasClass('show')){
+					saveCanvasWhite();
+					$(".whiteboard").animate({top:winHeight},1000,function() {
+						$("#whiteboard").removeClass('show');
+				    });
+				}
+				text.clearRect(0, 0, g_canvas.width, g_canvas.height);
+				resizeCanvas(num);
+				//move(g_canvas,text);
+				init(false);
+			}
+			function changeBackground(num) {
+				var fontIptNum = $("#font").find("input");
+				for(var j = 0, m = fontIptNum.length; j < m; j++) {
+					fontIptNum[j].className = "";
+					if(j == num) fontIptNum[j].className = "grea";
+				}
+			}
+			function changeColor(){
+				for(var i = 0, l = iptNum.length; i < l; i++) {
+					iptNum[i].index = i;
+					iptNum[i].onclick = function() {
+						$(this).addClass('active').siblings().removeClass('active');
+						$(".icon-eraser").css("color","#333");
+						$("#brush span").css("color",color[this.index]);
+						t.text.save();
+						t.text.strokeStyle = t.color[this.index];
+						t.text.storageColor = t.color[this.index];
+						t.text.strokeStyle = t.storageColor;
+						text.lineWidth = fontWeight[$("#font input").index($(".grea"))];
+						t.isEraser = false;
+					}
+				}			
+			 }
+			
+			function changeFont(){
+				for(var i = 0, l = fontIptNum.length; i < l; i++) {
+					fontIptNum[i].index = i;
+					fontIptNum[i].onclick = function() {
+						t.changeBackground(this.index);
+						$(".icon-eraser").css("color","#333");
+						$("#brush span").css("color",color[$("#color input").index($(".active"))]);
+						t.text.save();
+						t.text.strokeStyle = color[$("#color input").index($(".active"))];
+						t.text.storageColor = color[$("#color input").index($(".active"))];
+						t.text.strokeStyle = t.storageColor;
+						t.text.lineWidth = t.fontWeight[this.index];
+						t.isEraser = false;
+					}
+				}
+			}
+			
+			var imageObj = new Image();  
+	        imageObj.onload = function() {
+	        	g_canvas.width = imageObj.width;
+	        	g_canvas.height = imageObj.height;
+	        	text.drawImage(imageObj, 0, 0);
+	        	text.strokeStyle = color[$("#color input").index($(".active"))];
+			    text.lineWidth = fontWeight[$("#font input").index($(".grea"))];
+	        }; 
+			
+			function saveCanvas(num) {
+					var dataurl =document.getElementById("canvas1").toDataURL("image/png");
+					hashMap.Set(num,dataurl);
+			};
+			
+			function saveCanvasWhite() {
+				var dataurl =document.getElementById("canvas0").toDataURL("image/png");
+				hashMap.Set(-1,dataurl);
+		};
+			
+			function resizeCanvas(num) {
+					var  dataurl = hashMap.Get(num);
+					if(dataurl == null){
+						g_canvas.width = screenW;
+						g_canvas.height = screenH;
+					    //saveCanvas(num);
+					}else{
+						imageObj.src = dataurl;
+					}
+				    text.strokeStyle = color[$("#color input").index($(".active"))];
+				    text.lineWidth = fontWeight[$("#font input").index($(".grea"))];
+			};
+	 	
+	 	var isMouseDown = false;
+	 	
+	 	function bindCanvasEvent(canvasObject){
+	 		//var canvasTest = document.getElementById("canvas999");
+	 		canvasObject.onmousedown = function (e) {
+		        isMouseDown = true;
+		        var ev = e || window.event;
+	            var x = ev.clientX - canvasObject.offsetLeft;
+	            var y = ev.clientY - canvasObject.offsetTop;
+	            var context = canvasObject.getContext("2d");
+	            text.beginPath();
+	            text.moveTo(x,y);
+				
+		    };
+		    canvasObject.onmousemove = function (e) {
+	            var ev = e || window.event;
+	            var x = ev.clientX - canvasObject.offsetLeft;
+	            var y = ev.clientY - canvasObject.offsetTop;
+	            //$("#divPageInfo").html("x=" + x + ",y=" + y);
+	            if(t.isEraser){
+					t.resetEraser(x, y);
+					$('body').css("cursor","url(./assets/images/ppt/xp.png) 15 15,auto");
+				}else{
+					if(isMouseDown){
+						var context = canvasObject.getContext("2d");
+			          
+						text.lineTo(x,y);
+						text.stroke();
+			            $('body').css("cursor","auto");
+			            //$("#divPageInfo").html("x=" + x + ",y=" + y + ",g_canvas.height=" + g_canvas.height + ",g_canvas.width=" + g_canvas.width);
+					}
+		        }
+		        
+        	};
+        	canvasObject.onmouseup = function () {
+        		isMouseDown = false;
+	        };
+	        canvasObject.onmouseout = function () {
+	        	isMouseDown = false;
+	        };
+	        canvasObject.onmouseover = function () {
+	        };
+	 	}
+	 	$("#clear").click(function(){
+	 		text.clearRect(0, 0, g_canvas.width, g_canvas.height);
+	 	})
+		$("#eraser").click(function(){
+			t.isEraser = true;
+			$(".icon-eraser").css("color","#ff9422");
+			$(".icon-pencil").css("color","#333");
+			$('body').css("cursor","url(./assets/images/ppt/xp.png) 15 15,auto");
+	 	});
+	 	$("#brush").click(function(){
+	 		$('body').css("cursor","auto");
+	 	});
+	 	
+ 		function resetEraser(_x, _y) {
+			/*使用橡皮擦-提醒*/
+			var t = this;
+			this.text.lineWidth = 30; 
+			/*source-over 默认,相交部分由后绘制图形的填充(颜色,渐变,纹理)覆盖,全部浏览器通过*/
+			t.text.globalCompositeOperation = "destination-out";
+			t.text.beginPath();
+			t.text.arc(_x, _y, t.eraserRadius, 0, Math.PI * 2);
+			t.text.strokeStyle = "rgba(250,250,250,0)";
+			t.text.fill();
+			t.text.globalCompositeOperation = "source-over";
+		}
+ 		$("#whiteboard-btn").click(function(){
+ 			$("#whiteboard").siblings('li').addClass("none");
+			if(!$("#whiteboard").hasClass('show')){
+				$("#whiteboard").addClass('show');
+				$(".whiteboard").animate({top:0},1000);
+				g_canvas = document.getElementById("canvas0");
+				text = g_canvas.getContext('2d');
+				resizeCanvas(-1);
+				
+			}else{
+				saveCanvasWhite();
+				$(".whiteboard").animate({top:winHeight},1200,function() {
+					$("#whiteboard").removeClass('show');
+			    });
+				g_canvas = document.getElementById("canvas1");
+				text = g_canvas.getContext('2d');
+			}
+			
+		});
+ 	</script>
+</html>
